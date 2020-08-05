@@ -30,27 +30,23 @@ const rooms = {}
 
 //======================SOCKET==============================//
 
-const users = []
+let users = []
 
+CSVToJSON().fromFile(csvFilePath).then(rawUsers => {
+    users = rawUsers
 
-const readInformation = () => {
-    CSVToJSON().fromFile(csvFilePath).then((users) => {
-        initializePassport(
-            passport, 
-            email => users.find(user => user.email === email),
-            id => users.find(user => user.id === id)
-        )
-    })
-}
-readInformation()
+    initializePassport(
+        passport, 
+        email => users.find(user => user.email === email),
+        id => users.find(user => user.id === id)
+    )
+})
 
 // initializePassport(
 //     passport, 
 //     email => users.find(user => user.email === email),
 //     id => users.find(user => user.id === id)
 // )
-
-const csv = new ObjectsToCsv(users)
 
 app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended : true}))
@@ -106,19 +102,23 @@ app.get('/register',checkNotAuthenticated, (req,res) => {
 app.post('/register',checkNotAuthenticated, async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
-        users.push({
+        const csv = new ObjectsToCsv([{
             id: Date.now().toString(),
             name: req.body.name,
             email: req.body.email,
             password: hashedPassword
+        }])
+
+        await csv.toDisk('./logininformation.csv', { append: true })
+
+        CSVToJSON().fromFile(csvFilePath).then(rawUsers => {
+            users = rawUsers
         })
-        await csv.toDisk('./logininformation.csv', {append:true})
+
         res.redirect('/login')
     }catch {
         res.redirect('/register')
     }
-    // console.log(users)
-    // console.log(userProfile)
 })
 
 app.delete('/logout', (req,res) => {
