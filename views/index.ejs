@@ -7,7 +7,7 @@
     <style>
         * {margin:0; padding: 0; box-sizing: border-box;}
         body {font: 13px Helvetica, Arial}
-        form {background: #000; padding:3px; position:fixed; bottom:0; width:100%;}
+        #bruh2 {background: #000; padding:3px; position:fixed; bottom:0; width:100%;}
         form input {border:0; padding: 10px; width:90%; margin-right: 0.5%;}
         form button {width:9%; background:rgb(130,224,255); border: none; padding: 10px;}
         #messages {list-style-type: none; margin: 0; padding: 0;}
@@ -23,7 +23,7 @@
 <body>
     <div>
         <a href="/profile">Check your profile info (ユーザー情報の確認)</a>
-        <form action="/logout?_method=DELETE" method="POST">
+        <form id="bruh" action="/logout?_method=DELETE" method="POST">
             <button type="submit">Logout</button>
         </form>
     </div>
@@ -33,11 +33,13 @@
         <div><%= room %></div>
         <a href="/<%= room %>">Join</a>
     <% }) %>
+
     </div>
-    <form action="/room" method="POST">
+    <form id="bruh2" action="/room" method="POST">
         <input name="room" type="text" required>
         <button type="submit">New Room</button>
     </form>
+    
 </body>
 </html>
 
