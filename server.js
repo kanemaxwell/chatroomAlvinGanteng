@@ -26,7 +26,11 @@ nicknames = {}
 var clients = 0
 typingUsers = []
 
-const rooms = {}
+let rooms = []
+
+const findRoomByName = name => {
+    return rooms.find(room => room.name === name)
+}
 
 //======================SOCKET==============================//
 
@@ -70,11 +74,23 @@ app.get('/', checkAuthenticated, (req, res) => {  //ADD CHECKAUTHENTICATE LATER 
 })
 
 app.post('/room', async (req, res) => {
-    // if(rooms[req.body.room] != null) {
-    //     return res.redirect('/')
-    // }
-    rooms[req.body.room] = { users: {} }
-    res.redirect(req.body.room)
+    if(findRoomByName(req.body.room)) {
+        return res.redirect('/')
+    }
+
+    const room = {
+        name: req.body.room,
+        users: {}
+    }
+
+    const csv = new ObjectsToCsv([room])
+
+    await csv.toDisk('./room.csv', { append: true })
+
+    CSVToJSON().fromFile('./room.csv').then(rawRooms => {
+        rooms = rawRooms
+        res.redirect(req.body.room)
+    })
     //SEND TO SOCKET
 
     io.emit('room-created', req.body.room)
@@ -142,7 +158,7 @@ function checkNotAuthenticated(req, res, next) {
 
 
 app.get('/:room', (req, res) => {
-    if(rooms[req.params.room] == null) {
+    if(!findRoomByName(req.params.room)) {
         return res.redirect('/')
     }
     res.render('room.ejs', {roomName: req.params.room})
